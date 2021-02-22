@@ -1,6 +1,7 @@
 class Application
 
   @@items = ["Apples","Carrots","Pears"]
+  @@cart = []
 
   def call(env)
     resp = Rack::Response.new
@@ -11,8 +12,25 @@ class Application
         resp.write "#{item}\n"
       end
     elsif req.path.match(/search/)
-      search_term = req.params["q"]
-      resp.write handle_search(search_term)
+      search_term = req.params["q"] ## request paramater aka query parameter
+      resp.write handle_search(search_term) ## Find out about this
+    elsif req.path.match(/cart/)
+      if @@cart.empty?
+        resp.write "Your cart is empty"
+      else
+        @@cart.each do |item|
+          resp.write "#{item}\n"
+        end
+      end
+    elsif req.path.match(/add/)
+      item_to_add = req.params["item"] #params are just data passed through to the server in this case items list.
+      #param is the GET method and the item is they value since since in URL's there are key value pairs
+      if @@items.include? item_to_add 
+        @@cart << item_to_add
+        resp.write "added #{item_to_add}"
+      else
+        resp.write "We don't have that item!"
+      end
     else
       resp.write "Path Not Found"
     end
